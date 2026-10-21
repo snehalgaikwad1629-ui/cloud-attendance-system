@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digital Access Card</title>
+  <link rel="stylesheet" href="digital-card.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Digital Access Card</h1>
+    <p>Attendance Management System</p>
+
+    <section class="access-card">
+      <div class="card-icon">🎓</div>
+      <h2>Student Access Card</h2>
+      <p id="studentName">Loading student...</p>
+      <p id="studentId">Student ID: —</p>
+      <p id="cardStatus">Checking card status...</p>
+    </section>
+
+    <button id="tapButton" type="button" disabled>
+      Tap to Mark Attendance
+    </button>
+
+    <p id="message" role="status">Checking login...</p>
+    <a href="dashboard.html">Back to Dashboard</a>
+  </main>
+
+  <script type="module" src="digital-card.js"></script>
+</body>
+</html>
