@@ -1,5 +1,6 @@
-
+```javascript
 import { auth, db } from "./firebase.js";
+
 import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
@@ -7,8 +8,6 @@ import {
 import {
   collection,
   getDocs,
-  query,
-  where,
   doc,
   setDoc,
   getDoc,
@@ -23,51 +22,75 @@ const message = document.getElementById("message");
 
 let currentStudent = null;
 
+function showError(error) {
+  console.error("Digital Card error:", error);
+  message.textContent =
+    "Could not load card. Please check Firebase setup and Firestore rules.";
+}
+
 onAuthStateChanged(auth, async (user) => {
   tapButton.disabled = true;
   currentStudent = null;
 
+  studentName.textContent = "Checking student...";
+  studentId.textContent = "Student ID: —";
+  cardStatus.textContent = "Checking card status...";
+  message.textContent = "";
+
   if (!user) {
-    message.textContent = "Please log in first.";
     studentName.textContent = "Not logged in";
     cardStatus.textContent = "Card unavailable";
+    message.textContent = "Please log in first, then open this card.";
     return;
   }
 
   try {
-    // Find the student linked to this login email.
-    const studentsRef = collection(db, "students");
-    const emailQuery = query(
-      studentsRef,
-      where("email", "==", user.email)
-    );
-    const result = await getDocs(emailQuery);
+    const snapshot = await getDocs(collection(db, "students"));
 
-    if (result.empty) {
+    // Only link by email if a student record explicitly contains
+    // the same email as the authenticated account.
+    const matchedDoc = snapshot.docs.find((item) => {
+      const data = item.data();
+      return (
+        typeof data.email === "string" &&
+        data.email.toLowerCase() === user.email?.toLowerCase()
+      );
+    });
+
+    if (!matchedDoc) {
       studentName.textContent = user.displayName || "Student";
       studentId.textContent = "Student ID: Not linked";
       cardStatus.textContent = "Card not configured";
       message.textContent =
-        "Admin must link this login to a student record first.";
+        "No student record is linked to this login email. Ask the admin to link the correct student.";
       return;
     }
 
-    const studentDoc = result.docs[0];
+    const data = matchedDoc.data();
+
+    if (data.cardEnabled === false) {
+      studentName.textContent = data.name || "Student";
+      studentId.textContent = "Student ID: " + matchedDoc.id;
+      cardStatus.textContent = "Card disabled";
+      message.textContent = "This digital card is disabled.";
+      return;
+    }
+
     currentStudent = {
-      id: studentDoc.id,
-      ...studentDoc.data()
+      id: matchedDoc.id,
+      name: data.name || "Student"
     };
 
-    studentName.textContent = currentStudent.name || "Student";
-    studentId.textContent = "Student ID: " + studentDoc.id;
+    studentName.textContent = currentStudent.name;
+    studentId.textContent = "Student ID: " + currentStudent.id;
     cardStatus.textContent = "Digital card active";
     tapButton.disabled = false;
     message.textContent = "Ready to mark attendance.";
 
   } catch (error) {
-    console.error(error);
-    message.textContent =
-      "Could not load card. Check Firestore rules and student setup.";
+    showError(error);
+    studentName.textContent = "Unable to load student";
+    cardStatus.textContent = "Card unavailable";
   }
 });
 
@@ -80,7 +103,12 @@ tapButton.addEventListener("click", async () => {
   tapButton.disabled = true;
 
   try {
-    const today = new Date().toLocaleDateString("en-CA");
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const today = `${year}-${month}-${day}`;
+
     const attendanceId = `${today}_${currentStudent.id}`;
     const attendanceRef = doc(db, "Attendance", attendanceId);
     const existing = await getDoc(attendanceRef);
@@ -98,11 +126,11 @@ tapButton.addEventListener("click", async () => {
     });
 
     message.textContent = "Attendance marked successfully!";
+
   } catch (error) {
-    console.error(error);
-    message.textContent =
-      "Attendance failed. Check Firestore rules.";
+    showError(error);
   } finally {
     tapButton.disabled = false;
   }
 });
+```
