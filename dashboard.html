@@ -1,7 +1,180 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard | AMS</title><link rel="stylesheet" href="style.css"></head><body>
-<header class="topbar"><div class="brand">Attendance Management System</div><div class="top-actions"><span id="userEmail" class="small"></span><button id="logoutBtn">Logout</button></div></header>
-<div class="layout"><nav class="sidebar"><a class="active" href="dashboard.html">Dashboard</a><a href="students.html">Students</a><a href="attendance.html">Mark Attendance</a><a href="qr.html">QR Attendance</a><a href="scan.html">Scan QR</a><a href="report.html">Attendance Report</a></nav>
-<main class="content"><h1 class="page-title">Dashboard</h1><p class="sub-title">Overview of your class attendance.</p>
-<div class="cards"><div class="stat"><div class="label">Total Students</div><div class="value" id="totalStudents">—</div></div><div class="stat"><div class="label">Present Today</div><div class="value" id="presentToday">—</div></div><div class="stat"><div class="label">Absent Today</div><div class="value" id="absentToday">—</div></div><div class="stat"><div class="label">Attendance Today</div><div class="value" id="percentageToday">—</div></div></div>
-<div class="panel"><h2>Quick actions</h2><div class="toolbar"><a href="students.html"><button class="primary">Manage Students</button></a><a href="attendance.html"><button class="secondary">Mark Attendance</button></a><a href="report.html"><button class="secondary">View Report</button></a><a href="qr.html"><button class="secondary">Generate QR</button></a><a href="scan.html"><button class="secondary">Scan QR</button></a></div><p id="dashboardMessage" class="hint"></p></div>
-</main></div><script type="module" src="dashboard.js"></script></body></html>
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Dashboard</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f3f6fb;
+      color: #243047;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+    }
+
+    header {
+      background: #243b70;
+      color: white;
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin: 25px 0;
+    }
+
+    .stat {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 8px #00000010;
+    }
+
+    .stat h2 {
+      color: #243b70;
+      margin: 8px 0;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .menu a {
+      display: block;
+      padding: 22px 15px;
+      border-radius: 10px;
+      background: white;
+      color: #243b70;
+      text-decoration: none;
+      text-align: center;
+      font-weight: bold;
+      border: 1px solid #dce3ef;
+      box-shadow: 0 2px 8px #00000010;
+    }
+
+    .menu a:hover {
+      background: #e7edfa;
+    }
+
+    .logout {
+      display: block;
+      margin: 25px auto;
+      padding: 12px 24px;
+      border: 0;
+      border-radius: 8px;
+      background: #c0392b;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #message {
+      text-align: center;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+
+    <header>
+      <h1>Attendance Management System</h1>
+      <p>Cloud-Based Attendance Dashboard</p>
+    </header>
+
+    <section class="stats">
+      <div class="stat">
+        <p>Total Students</p>
+        <h2>100</h2>
+      </div>
+
+      <div class="stat">
+        <p>Present</p>
+        <h2>85</h2>
+      </div>
+
+      <div class="stat">
+        <p>Absent</p>
+        <h2>15</h2>
+      </div>
+
+      <div class="stat">
+        <p>Attendance</p>
+        <h2>85%</h2>
+      </div>
+    </section>
+
+    <nav class="menu">
+      <a href="student.html">👩‍🎓 Student Management</a>
+
+      <a href="attendence.html">✅ Mark Attendance</a>
+
+      <a href="report.html">📊 Attendance Report</a>
+
+      <a href="qr.html">📱 QR Attendance</a>
+
+      <a href="digital-card.html">🎓 Digital Access Card</a>
+    </nav>
+
+    <p id="message" role="status"></p>
+
+    <button class="logout" id="logoutButton" type="button">
+      Logout
+    </button>
+
+  </main>
+
+  <script type="module">
+    import { auth } from "./firebase.js";
+    import {
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+
+    const message = document.getElementById("message");
+    const logoutButton = document.getElementById("logoutButton");
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+      }
+    });
+
+    logoutButton.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        window.location.href = "index.html";
+      } catch (error) {
+        console.error(error);
+        message.textContent = "Logout failed. Please try again.";
+      }
+    });
+  </script>
+
+</body>
+</html>
+```
